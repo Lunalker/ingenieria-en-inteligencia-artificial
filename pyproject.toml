@@ -1,0 +1,43 @@
+# Proyecto de dependencias para notebooks y prácticas del curso (no es un paquete instalable).
+# Uso recomendado: uv sync  →  (opcional) source .venv/bin/activate  →  uv run jupyter lab
+
+[project]
+name = "ingenieria-soluciones-con-ia"
+version = "0.1.0"
+description = "Materiales del curso Ingeniería de Soluciones con Inteligencia Artificial"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.0.0",
+    "langchain>=1.0.0",
+    "langchain-openai>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-text-splitters>=0.3.0",
+    "langsmith>=0.3.0",
+    "langgraph>=0.3.0",
+    "crewai>=0.100.0",
+    "crewai-tools>=0.38.0",
+    "faiss-cpu>=1.7.0",
+    "tiktoken>=0.5.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "scikit-learn>=1.3.0",
+    "matplotlib>=3.7.0",
+    "plotly>=5.15.0",
+    "seaborn>=0.12.0",
+    "streamlit>=1.30.0",
+    "requests>=2.31.0",
+    "httpx>=0.25.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.0.0",
+    "pytest>=7.0.0",
+    "wikipedia>=1.4.0",
+    "langchain-classic>=0.3.0",
+    "lxml>=6.0.2",
+]
+
+[tool.uv]
+package = false
