@@ -1,0 +1,128 @@
+[
+  {
+    "id": "envios_1",
+    "topic": "Mercado Envíos",
+    "title": "¿Qué es Mercado Envíos?",
+    "content": "Mercado Envíos es el servicio de logística de Mercado Libre. Ofrece envíos gratis en compras superiores a $8,000 ARS. Los plazos de entrega son de 1 a 5 días hábiles para envíos Full y de 3 a 10 días hábiles para envíos estándar. Los vendedores pueden usar Mercado Envíos para gestionar la logística de sus ventas."
+  },
+  {
+    "id": "envios_2",
+    "topic": "Mercado Envíos",
+    "title": "Envío Full",
+    "content": "Envío Full es un servicio premium de Mercado Envíos donde Mercado Libre almacena los productos en sus centros de distribución y gestiona toda la logística. Los productos con Envío Full llegan en 1 a 3 días hábiles. El vendedor solo debe enviar sus productos al centro de distribución de Mercado Libre."
+  },
+  {
+    "id": "envios_3",
+    "topic": "Mercado Envíos",
+    "title": "Seguimiento de Envíos",
+    "content": "Para rastrear un envío, el comprador puede ingresar a 'Mis Compras' y seleccionar el producto. Allí encontrará el número de seguimiento y el estado actualizado del paquete. También puede activar notificaciones para recibir actualizaciones por correo electrónico o en la app de Mercado Libre."
+  },
+  {
+    "id": "compra_protegida_1",
+    "topic": "Compra Protegida",
+    "title": "¿Qué es Compra Protegida?",
+    "content": "Compra Protegida es el programa de protección al comprador de Mercado Libre. Cubre al comprador si el producto no llega, no coincide con la descripción, o está dañado. El comprador tiene 30 días desde la recepción para iniciar un reclamo. El reembolso se procesa en un plazo de 5 a 10 días hábiles."
+  },
+  {
+    "id": "compra_protegida_2",
+    "topic": "Compra Protegida",
+    "title": "¿Cómo iniciar un reclamo?",
+    "content": "Para iniciar un reclamo por Compra Protegida, ve a 'Mis Compras', selecciona el producto y haz clic en 'Iniciar reclamo'. Debes proporcionar evidencia (fotos, videos) del problema. Mercado Libre revisará el caso en un plazo de 48 horas hábiles y te notificará la resolución."
+  },
+  {
+    "id": "mercadopago_1",
+    "topic": "Mercado Pago",
+    "title": "¿Qué es Mercado Pago?",
+    "content": "Mercado Pago es la plataforma de pagos de Mercado Libre. Acepta tarjetas de crédito, débito, transferencias bancarias y efectivo. Ofrece cuotas sin interés en productos seleccionados. Mercado Pago también ofrece una billetera digital y tarjeta prepaga. Las transferencias son inmediatas entre usuarios de Mercado Pago."
+  },
+  {
+    "id": "mercadopago_2",
+    "topic": "Mercado Pago",
+    "title": "Cuotas sin interés",
+    "content": "Las cuotas sin interés en Mercado Libre dependen del banco emisor de la tarjeta, la categoría del producto y las promociones vigentes. Las promociones se actualizan mensualmente. Para ver las cuotas disponibles, selecciona el producto y en la página de pago elige tu banco para ver las opciones de financiación."
+  },
+  {
+    "id": "mercadopago_3",
+    "topic": "Mercado Pago",
+    "title": "Mercado Pago Cuenta",
+    "content": "La cuenta de Mercado Pago permite recibir y enviar dinero, pagar servicios, recargar celular, y generar intereses por el saldo disponible. Es gratuita y se puede abrir desde la app. Ofrece una tarjeta prepaga Mastercard para compras en comercios físicos y online."
+  },
+  {
+    "id": "devoluciones_1",
+    "topic": "Devoluciones",
+    "title": "Política de Devoluciones",
+    "content": "Los compradores tienen 30 días desde la recepción del producto para solicitar una devolución. El producto debe estar en las mismas condiciones en que fue recibido. Los costos de envío de la devolución son cubiertos por Mercado Libre. El reembolso se realiza una vez que el vendedor recibe y verifica el producto."
+  },
+  {
+    "id": "devoluciones_2",
+    "topic": "Devoluciones",
+    "title": "Proceso de Devolución",
+    "content": "Para devolver un producto: 1) Ve a 'Mis Compras' y selecciona el producto. 2) Haz clic en 'Solicitar devolución'. 3) Selecciona el motivo. 4) Imprime la etiqueta de envío. 5) Entrega el paquete en la sucursal del correo indicado. Una vez recibido, el reembolso se procesa en 5 a 10 días hábiles."
+  },
+  {
+    "id": "garantia_1",
+    "topic": "Garantía",
+    "title": "Cobertura de Garantía",
+    "content": "Los productos vendidos en Mercado Libre tienen una garantía mínima de 6 meses para productos nuevos y 3 meses para productos usados. La garantía cubre defectos de fábrica. No cubre daños por mal uso, accidentes o modificaciones no autorizadas. Para hacer efectiva la garantía, el comprador debe contactar al vendedor."
+  },
+  {
+    "id": "ventas_1",
+    "topic": "Ventas",
+    "title": "Vender en Mercado Libre",
+    "content": "Los vendedores en Mercado Libre pueden publicar productos de forma gratuita y pagan una comisión solo cuando venden. Las comisiones varían según la categoría del producto y el plan de ventas elegido. Los vendedores pueden usar Mercado Envíos para gestionar la logística. Las reputaciones se basan en las calificaciones de los compradores."
+  },
+  {
+    "id": "ventas_2",
+    "topic": "Ventas",
+    "title": "Reputación del Vendedor",
+    "content": "La reputación del vendedor en Mercado Libre se calcula en base a las calificaciones recibidas en los últimos 12 meses. Los niveles son: Plata (ventas > 50), Oro (ventas > 500), Platino (ventas > 5,000). Una buena reputación aumenta la visibilidad de los productos y la confianza de los compradores."
+  },
+  {
+    "id": "facturacion_1",
+    "topic": "Facturación",
+    "title": "Facturas Electrónicas",
+    "content": "Mercado Libre emite facturas electrónicas por todas las transacciones. Los compradores pueden descargar sus facturas desde la sección 'Mis Compras'. Los vendedores pueden generar facturas desde 'Mis Ventas'. Las facturas incluyen IVA y otros impuestos aplicables según la legislación local."
+  },
+  {
+    "id": "seguridad_1",
+    "topic": "Seguridad",
+    "title": "Consejos de Seguridad",
+    "content": "Mercado Libre utiliza encriptación SSL para proteger los datos. No compartas tu contraseña con nadie. Mercado Libre nunca solicitará datos sensibles por correo electrónico. Activa la verificación en dos pasos. Reporta cualquier actividad sospechosa al centro de ayuda. Usa contraseñas fuertes y diferentes para cada servicio."
+  },
+  {
+    "id": "seguridad_2",
+    "topic": "Seguridad",
+    "title": "Verificación en Dos Pasos",
+    "content": "La verificación en dos pasos añade una capa extra de seguridad a tu cuenta de Mercado Libre. Al activarla, además de tu contraseña, se te pedirá un código que se envía a tu teléfono. Puedes activarla desde Configuración > Seguridad > Verificación en dos pasos en la app o sitio web."
+  },
+  {
+    "id": "reembolsos_1",
+    "topic": "Reembolsos",
+    "title": "Proceso de Reembolso",
+    "content": "Los reembolsos se procesan en un plazo de 5 a 10 días hábiles. El método de reembolso depende del método de pago original. Para tarjeta de crédito, se acredita en el resumen. Para pagos en efectivo, se realiza mediante depósito bancario o en la cuenta de Mercado Pago."
+  },
+  {
+    "id": "pagos_1",
+    "topic": "Medios de Pago",
+    "title": "Medios de Pago Aceptados",
+    "content": "Mercado Libre acepta tarjetas de crédito (Visa, Mastercard, Amex, Cabal), tarjetas de débito, transferencias bancarias, efectivo (Rapipago, Pago Fácil) y Mercado Pago. Las promociones de cuotas sin interés varían según el banco. Algunos métodos tienen montos mínimos y máximos."
+  },
+  {
+    "id": "privacidad_1",
+    "topic": "Privacidad",
+    "title": "Política de Privacidad",
+    "content": "Mercado Libre recopila datos personales para procesar transacciones y mejorar sus servicios. Los datos no se comparten con terceros sin consentimiento. Los usuarios pueden solicitar la eliminación de sus datos contactando al centro de privacidad. Las cookies se utilizan para mejorar la experiencia de navegación."
+  },
+  {
+    "id": "atencion_1",
+    "topic": "Atención al Cliente",
+    "title": "Canales de Atención",
+    "content": "Mercado Libre ofrece atención al cliente a través del Centro de Ayuda en su sitio web, la app móvil, y redes sociales (Twitter @ML_ayuda). También puedes contactar por chat en vivo desde la sección de ayuda. El horario de atención es de lunes a viernes de 8:00 a 20:00 y sábados de 9:00 a 18:00."
+  },
+  {
+    "id": "internacional_1",
+    "topic": "Envío Internacional",
+    "title": "Compras Internacionales",
+    "content": "Mercado Libre ofrece envíos internacionales a través de Mercado Envíos Internacional. Los plazos de entrega varían según el país de origen y destino. Los costos de importación y aranceles son responsabilidad del comprador. Algunos productos tienen restricciones de envío internacional por cuestiones aduaneras."
+  }
+]
