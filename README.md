@@ -43,7 +43,6 @@ Usuario → Seguridad (PII + inyección) → Clasificación (tipo/prioridad/conf
 - **Orquestación:** LangGraph
 - **Base de datos:** SQLite
 - **Infraestructura:** AWS EC2 (t2.micro), DuckDNS, Nginx reverse proxy
-- **Idioma:** Español neutro, precios en CLP
 
 ## Instalación Local
 
