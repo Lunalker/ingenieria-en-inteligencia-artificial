@@ -1,81 +1,99 @@
-# ingenieria-en-inteligencia-artificial-parcial1
-<<<<<<< HEAD
+# MeliExpert — Asistente Inteligente de Mercado Libre
 
-=======
->>>>>>> 8057d295ea702433102aa2fb7ad7ca01d5e91038
-# Proyecto: Chatbot de Soporte Integral - Mercado Libre 🚀
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![GPT-4o](https://img.shields.io/badge/Model-GPT--4o-412991?logo=openai&logoColor=white)](https://github.com/marketplace/models)
+[![FAISS](https://img.shields.io/badge/Vector%20Search-FAISS-0066FF)](https://github.com/facebookresearch/faiss)
+[![SQLite](https://img.shields.io/badge/DB-SQLite-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
 
-##  Descripción General
-<img width="500" height="250" alt="image" src="https://github.com/user-attachments/assets/037db55f-4129-4206-873d-da616ae45532" />
+> Chatbot multi-agente con 8 conceptos de IA integrados, desplegado en AWS EC2 con dominio DuckDNS.
 
-Este proyecto consiste en el desarrollo de un asistente virtual inteligente diseñado para integrarse en el ecosistema de **Mercado Libre**. El chatbot actúa como el primer punto de contacto para usuarios (compradores y vendedores), optimizando la resolución de dudas, el seguimiento de pedidos y la gestión de servicios financieros.
+## Demo
 
----
+**http://meliexpert.duckdns.org:8501**
 
-## Identificación de la Organización
+## Arquitectura
 
-### **Nombre de la Organización**
-**Mercado Libre S.R.L.**
+```
+Usuario → Seguridad (PII + inyección) → Clasificación (tipo/prioridad/conflicto)
+         → Router condicional → 6 Agentes especializados (LangGraph)
+                              → o Escalamiento automático
+                              → siempre: RAG (FAISS) + Trazabilidad (SQLite)
+```
 
-### **Rubro y Sector**
-* **E-commerce:** Plataforma líder en compraventa de productos en América Latina.
-* **Fintech:** Servicios de procesamiento de pagos, créditos y billetera digital a través de **Mercado Pago**.
-* **Logística:** Gestión de envíos y almacenamiento mediante **Mercado Envíos**.
+## Conceptos Implementados
 
-### **Tamaño y Contexto**
-* **Categoría:** Gran Empresa / Unicornio Tecnológico.
-* **Alcance:** +50,000 colaboradores y presencia en 18 países.
-* **Contexto:** La empresa opera en un entorno de **alta criticidad**, donde la velocidad de respuesta impacta directamente en la reputación del vendedor y la confianza del comprador.
+| # | Concepto | Implementación |
+|---|----------|---------------|
+| 1 | **Seguridad y filtros éticos** | Detección de PII (tarjetas, emails, teléfonos, DNI) con enmascaramiento automático + detección de inyección de prompts |
+| 2 | **RAG con evaluación** | FAISS sobre 21 documentos de políticas de MELI con RecursiveCharacterTextSplitter |
+| 3 | **Descomposición de tareas** | LLM divide consultas complejas en subtareas secuenciales con dependencias |
+| 4 | **Workflows multi-paso** | 3 workflows: Devolución (5 pasos), Reclamo (4 pasos), Asesoría de Compra (4 pasos) con máquina de estados |
+| 5 | **Orquestación multi-agente** | LangGraph con 6 agentes (Ventas, Soporte, Facturación, Envíos, Seguridad, General) + enrutamiento condicional |
+| 6 | **Asignación de recursos** | Prioridad 0-10 basada en palabras clave de urgencia e insatisfacción |
+| 7 | **Resolución de conflictos** | Escalamiento automático por keywords legales o prioridad ≥ 9 |
+| 8 | **Trazabilidad y métricas** | SQLite con panel de métricas en sidebar (últimos 7 días) |
 
----
+## Stack Tecnológico
 
-##  L1.1: Ingeniería de Prompts (Estrategia del Modelo)
+- **Frontend:** Streamlit
+- **LLM:** GPT-4o vía GitHub Models (gratuito)
+- **Embeddings:** text-embedding-3-small
+- **Vector Store:** FAISS (CPU)
+- **Orquestación:** LangGraph
+- **Base de datos:** SQLite
+- **Infraestructura:** AWS EC2 (t2.micro), DuckDNS, Nginx reverse proxy
+- **Idioma:** Español neutro, precios en CLP
 
-Para este caso, se han diseñado prompts específicos que ajustan su estructura y contenido según el requerimiento informacional.
+## Instalación Local
 
-### 1. Definición del Sistema (Role Prompting)
-Define la identidad y límites del bot para mantener la coherencia de marca.
+```bash
+git clone https://github.com/tuusuario/meliexpert.git
+cd meliexpert
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+```
 
-> **Prompt:**
-> "Actúa como un Asistente Virtual experto de Mercado Libre. Tu tono debe ser profesional, cercano y resolutivo. Si un usuario pregunta por datos sensibles, deniega la petición por seguridad. Tu prioridad es la satisfacción del cliente sin comprometer las políticas de la empresa."
+Crear `.env`:
+```env
+GITHUB_TOKEN=ghp_tu_token_classic
+CONFIG_EMAIL_REMITENTE=tucorreo@gmail.com
+CONFIG_EMAIL_PASSWORD=contraseña_app
+```
 
-### 2. Clasificación de Requerimientos (Zero-Shot)
-Utilizado para dirigir la consulta al departamento correcto (E-commerce o Fintech).
+Ejecutar:
+```bash
+streamlit run app.py --server.port 8501
+```
 
-> **Prompt:**
-> "Clasifica el siguiente mensaje en una de estas categorías: [LOGISTICA], [PAGOS], [CUENTA], [RECLAMOS]. 
-> Mensaje: 'Mi tarjeta fue rechazada pero el banco dice que está bien'.
-> Salida: [PAGOS]"
+## Despliegue en AWS EC2
 
-### 3. Extracción de Datos (Information Extraction)
-Ajuste de estructura para alimentar bases de datos o APIs de seguimiento.
+1. Lanzar instancia Amazon Linux 2023 (t2.micro)
+2. Abrir puertos 22, 80, 8501 en Security Group
+3. Asociar Elastic IP
+4. Subir proyecto y ejecutar:
 
-> **Prompt:**
-> "Extrae el número de operación y el motivo de contacto del siguiente texto: 
-> 'Hola, tengo un problema con el envío 400029384, el paquete llegó golpeado'.
-> 
-> Formato de salida (JSON):
-> {
->   'order_id': '400029384',
->   'issue': 'producto_dañado'
-> }"
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+```
 
----
+5. (Opcional) Configurar DuckDNS + Nginx para dominio personalizado
 
-##  Especificaciones Técnicas del Bot
-* **Modelo Base:** GPT-4o / Gemini 1.5 Pro.
-* **Arquitectura:** RAG (Retrieval-Augmented Generation) para consultar bases de conocimiento internas.
-* **Flujos Principales:**
-    1.  Rastreo de envíos en tiempo real.
-    2.  Gestión de devoluciones automatizadas.
-    3.  Soporte técnico para vendedores.
+## Estructura del Proyecto
 
----
+```
+├── app.py                  # Aplicación Streamlit completa
+├── data/
+│   ├── knowledge_base.json # Base de conocimiento RAG (21 docs)
+│   └── meliexpert.db       # SQLite de trazabilidad
+├── requirements.txt
+└── .env
+```
 
-##  Objetivos del Repositorio
-* Documentar la lógica de conversación.
-* Centralizar los prompts optimizados para el caso Mercado Libre.
-* Establecer protocolos de escalada a agentes humanos.
+## Licencia
 
----
-> **Estado del Proyecto:** En desarrollo (Fase de diseño de prompts).
+MIT
