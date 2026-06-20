@@ -26,17 +26,19 @@ load_dotenv()
 # CONFIG
 # ──────────────────────────────────────────────
 MI_TOKEN = os.getenv("GITHUB_TOKEN", "")
+MI_TOKEN2 = os.getenv("GITHUB_TOKEN2", "")
 REMITE = os.getenv("CONFIG_EMAIL_REMITENTE")
 REMPASS = os.getenv("CONFIG_EMAIL_PASSWORD")
 KB_PATH = Path(__file__).parent / "data" / "knowledge_base.json"
 DB_PATH = Path(__file__).parent / "data" / "meliexpert.db"
 
-if not MI_TOKEN:
+TOKENS = [t for t in [MI_TOKEN, MI_TOKEN2] if t]
+if not TOKENS:
     st.warning("GITHUB_TOKEN no configurado. Edita .env")
 
 llm = ChatOpenAI(
     base_url="https://models.inference.ai.azure.com",
-    api_key=MI_TOKEN,
+    api_key=TOKENS[0] if TOKENS else "",
     model="gpt-4o",
     temperature=0.1,
     streaming=True,
@@ -44,7 +46,7 @@ llm = ChatOpenAI(
 
 embeddings = OpenAIEmbeddings(
     base_url="https://models.github.ai/inference",
-    api_key=MI_TOKEN,
+    api_key=TOKENS[0] if TOKENS else "",
     model="text-embedding-3-small",
 )
 
@@ -439,6 +441,13 @@ def _formatear_productos_html(texto: str) -> str:
 # ──────────────────────────────────────────────
 @st.cache_resource
 def build_vectorstore():
+    FAISS_INDEX_PATH = Path(__file__).parent / "data" / "faiss_index"
+    if FAISS_INDEX_PATH.exists():
+        try:
+            vs = FAISS.load_local(str(FAISS_INDEX_PATH), embeddings, allow_dangerous_deserialization=True)
+            return vs
+        except Exception:
+            pass
     if not KB_PATH.exists():
         st.warning(f"No se encontró {KB_PATH}. RAG desactivado.")
         return None
@@ -455,18 +464,40 @@ def build_vectorstore():
         return None
     try:
         vs = FAISS.from_texts(chunks, embeddings, metadatas=meta_chunks)
+        vs.save_local(str(FAISS_INDEX_PATH))
         return vs
     except Exception as e:
-        st.warning(f"Error creando vectorstore: {e}")
+        if "Too many requests" in str(e) or "429" in str(e) or "RateLimit" in str(e):
+            pass
+        else:
+            st.warning(f"No se pudo crear el índice de búsqueda. RAG desactivado.")
         return None
 
 def retrieve_context(query: str, k: int = 3) -> List[Dict]:
     vs = build_vectorstore()
     if vs is None:
-        return []
+        return keyword_search(query, k)
     try:
         docs = vs.similarity_search_with_score(query, k=k)
         return [{"content": d[0].page_content, "topic": d[0].metadata.get("topic", ""), "score": float(d[1])} for d in docs]
+    except Exception:
+        return keyword_search(query, k)
+
+def keyword_search(query: str, k: int = 3) -> List[Dict]:
+    """Búsqueda por palabras clave cuando el vectorstore no está disponible."""
+    if not KB_PATH.exists():
+        return []
+    try:
+        docs = json.loads(KB_PATH.read_text(encoding="utf-8"))
+        query_words = set(query.lower().split())
+        scored = []
+        for d in docs:
+            text = (d["title"] + " " + d["content"]).lower()
+            score = sum(1 for w in query_words if w in text)
+            if score > 0:
+                scored.append({"content": d["title"] + "\n" + d["content"], "topic": d["topic"], "score": score})
+        scored.sort(key=lambda x: x["score"], reverse=True)
+        return scored[:k]
     except Exception:
         return []
 
@@ -497,6 +528,23 @@ Reglas:
         tasks = json.loads(content)
         return tasks if isinstance(tasks, list) else [tasks]
     except Exception:
+        for token in TOKENS:
+            try:
+                llm_fb = ChatOpenAI(
+                    base_url="https://models.inference.ai.azure.com",
+                    api_key=token,
+                    model="gpt-4o",
+                    temperature=0.1,
+                    timeout=30,
+                )
+                chain_fb = prompt | llm_fb
+                raw = chain_fb.invoke({"query": query})
+                content = raw.content if hasattr(raw, "content") else str(raw)
+                content = re.sub(r'```(?:json)?\s*', '', content).strip()
+                tasks = json.loads(content)
+                return tasks if isinstance(tasks, list) else [tasks]
+            except Exception:
+                continue
         return [{"id": 1, "tarea": query, "tipo": "informacion", "depende_de": []}]
 
 # ──────────────────────────────────────────────
@@ -713,6 +761,8 @@ workflow_engine = WorkflowEngine()
 def init_db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(DB_PATH))
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=5000")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS interacciones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -793,6 +843,29 @@ class AgentState(TypedDict):
     resolution: str
     resolved: bool
 
+# ── Token rotation helper ──
+def _try_tokens(prompt_text: str, system_msg: str = "Eres MeliExpert de Mercado Libre. Responde en español neutro con precios en CLP.") -> Optional[str]:
+    """Prueba cada token con GPT-4o hasta que uno funcione."""
+    for token in TOKENS:
+        try:
+            llm_tmp = ChatOpenAI(
+                base_url="https://models.inference.ai.azure.com",
+                api_key=token,
+                model="gpt-4o",
+                temperature=0.1,
+                timeout=60,
+            )
+            prompt_tmp = ChatPromptTemplate.from_messages([
+                ("system", system_msg),
+                ("human", "{input}"),
+            ])
+            chain_tmp = prompt_tmp | llm_tmp
+            result = chain_tmp.invoke({"input": prompt_text})
+            return result.content if hasattr(result, "content") else str(result)
+        except Exception:
+            continue
+    return None
+
 def node_security(state: AgentState) -> AgentState:
     last_msg = state["messages"][-1] if state["messages"] else HumanMessage(content="")
     text = last_msg.content if hasattr(last_msg, "content") else str(last_msg)
@@ -814,6 +887,30 @@ def node_classify(state: AgentState) -> AgentState:
         state["session_id"], text, state["priority"]
     )
     return state
+
+def _invoke_with_fallback(chain, config, input_data, model_label="gpt-4o"):
+    """Intenta con GPT-4o rotando tokens si hay rate limit."""
+    text = input_data.get("input", input_data.get("query", "")) if isinstance(input_data, dict) else str(input_data)
+    for token in TOKENS:
+        try:
+            llm_temp = ChatOpenAI(
+                base_url="https://models.inference.ai.azure.com",
+                api_key=token,
+                model="gpt-4o",
+                temperature=0.1,
+                streaming=True,
+                timeout=30,
+            )
+            chain_temp = chain | llm_temp
+            return chain_temp.invoke(input_data, config=config)
+        except Exception as e:
+            if "429" in str(e) or "RateLimitReached" in str(e):
+                continue
+            raise
+    result = _try_tokens(text)
+    if result:
+        return AIMessage(content=result)
+    return AIMessage(content="❌ **Límite alcanzado en todas las cuentas.** Probá con otro token o esperá a mañana.")
 
 def build_agent_node(qt: QueryType):
     def node(state: AgentState) -> AgentState:
@@ -854,7 +951,7 @@ def build_agent_node(qt: QueryType):
             input_messages_key="input",
             history_messages_key="chat_history",
         )
-        result = chain_with_history.invoke({"input": agent_input}, config=config)
+        result = _invoke_with_fallback(chain_with_history, config, {"input": agent_input})
         respuesta = result.content if hasattr(result, "content") else str(result)
 
         # Enviar por correo si el usuario lo pidió
@@ -1379,6 +1476,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "session_id" not in st.session_state:
     st.session_state.session_id = hashlib.md5(str(time.time()).encode()).hexdigest()[:12]
+if "processing" not in st.session_state:
+    st.session_state.processing = False
 
 sid = st.session_state.session_id
 
@@ -1443,12 +1542,17 @@ with col1:
                 st.markdown(msg["content"])
 
         if prompt := st.chat_input("Escribe tu mensaje aquí..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+            if st.session_state.processing:
+                st.warning("⏳ Espera a que termine el mensaje actual antes de enviar otro.")
+            else:
+                st.session_state.processing = True
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.markdown(prompt)
 
             with st.chat_message("assistant"):
-                state = AgentState(
+                with st.spinner("🧠 Analizando tu consulta..."):
+                    state = AgentState(
                     messages=[HumanMessage(content=prompt)],
                     session_id=sid,
                     query_type=QueryType.GENERAL,
@@ -1489,9 +1593,38 @@ with col1:
                             for d in docs:
                                 st.caption(f"→ {d['topic']} — score: {d['score']:.2f}")
                 except Exception as e:
-                    response = f"❌ Error procesando tu consulta: {str(e)}"
-                    st.markdown(response)
+                    err = str(e)
+                    if "RateLimitReached" in err or "429" in err:
+                        response = None
+                        for token in TOKENS:
+                            try:
+                                llm_fb = ChatOpenAI(
+                                    base_url="https://models.inference.ai.azure.com",
+                                    api_key=token,
+                                    model="gpt-4o",
+                                    temperature=0.1,
+                                    timeout=60,
+                                )
+                                prompt_fb = ChatPromptTemplate.from_messages([
+                                    ("system", "Eres MeliExpert de Mercado Libre. Responde en español neutro con precios en CLP."),
+                                    ("human", "{input}"),
+                                ])
+                                chain_fb = prompt_fb | llm_fb
+                                result_fb = chain_fb.invoke({"input": prompt})
+                                response = result_fb.content if hasattr(result_fb, "content") else str(result_fb)
+                                st.markdown(response)
+                                break
+                            except Exception:
+                                continue
+                        if response is None:
+                            response = "❌ **Límite de uso del día alcanzado en todas las cuentas.** Vuelve a intentar mañana o cambiá de token."
+                            st.markdown(response)
+                    else:
+                        response = f"❌ Error procesando tu consulta: {err}"
+                        st.markdown(response)
                     log_interaction(sid, "error", prompt, response, 0, False, 0, "", False)
+                finally:
+                    st.session_state.processing = False
             st.session_state.messages.append({"role": "assistant", "content": response})
 
     with tab2:
